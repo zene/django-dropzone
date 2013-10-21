@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% comment %} 
+    This file just highlights how you might use an array of dropzone keys to send over to a view to attach the DropzoneImage
+    instances to your other models, etc.
+ {% endcomment %}
+
+{% block extrahead %}
+    <link href="{{ STATIC_URL }}css/dropzone/basic.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}css/dropzone/dropzone.css" rel="stylesheet">
+
+    <script src="{{ STATIC_URL }}/js/dropzone/dropzone.js"></script>
+    <script>
+        // This array allows you to send the list of uploaded image ids to the server
+        var dropzone_array = []
+        // Turn off autoDiscover to allow us to register the dropzone with the options and do stuff with it later.
+        Dropzone.autoDiscover = false;
+        Dropzone.options.myDropzone = {
+            maxFilesize: 2, // MB
+            addRemoveLinks: true,
+            init: function() {
+                // Listen for Dropzone events and do stuff when they occur.
+                this.on("success", function(file, response) {
+                    // This adds a 'key' attribute to the dropzone remove link.
+                    // Allows us to call the dropzone_delete url with a way to locate
+                    //   the correct DropzoneImage instance.
+                    $(file._removeLink).attr('key', response.key);
+                    // Add to the key array for later use
+                    dropzone_array.push(response.key);
+                    // console.log(response);
+                }),
+                this.on("removedfile", function(file) {
+                    // Remove the file from the server.
+                    var key = $(file._removeLink).attr('key');
+
+                    // Remove the key from the array
+                    for (var i = 0; i < dropzone_array.length; i++) {
+                      // Remove the item from the array.
+                      if(dropzone_array[i] === key) {
+                         dropzone_array.splice(i, 1);
+                      }
+                    };
+
+                    $.post(
+                        "{% url 'dropzone_delete' %}",
+                        {'key': key},
+                        function(data){
+                            if (data.success) {
+                                alert('File successfully removed from server.')
+                            }
+                        }, 'json'
+                    );
+                    // console.log('file removed');
+                })
+            }
+        };
+
+        $(function() {
+            var myDropzone = new Dropzone("div#myDropzone", { url: "{% url 'dropzone_upload' %}"});
+
+            $('#someForm').submit(function(e){
+                // Pass the dropzone_array in the form.
+                $('#dropzone_array').val(dropzone_array);
+            });
+        });
+    </script>
+{% endblock extrahead %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h4>Dropzone</h4>
+
+            <div class="dropzone" id="myDropzone">
+                <div class="fallback">
+                    <input name="file" type="file" multiple />
+                </div>
+            </div>
+
+            <form id="someForm" action="/some/url/">
+                <input type="text" id="dropzone_array">
+            </form>
+        </div>
+    </div>
+{% endblock content %}

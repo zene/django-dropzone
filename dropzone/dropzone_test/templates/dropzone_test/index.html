@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+    <link href="{{ STATIC_URL }}css/dropzone/basic.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}css/dropzone/dropzone.css" rel="stylesheet">
+
+    <script src="{{ STATIC_URL }}/js/dropzone/dropzone.js"></script>
+    <script>
+        // Turn off autoDiscover to allow us to register the dropzone with the options and do stuff with it later.
+        Dropzone.autoDiscover = false;
+        Dropzone.options.myDropzone = {
+            maxFilesize: 2, // MB
+            addRemoveLinks: true,
+            init: function() {
+                // Listen for Dropzone events and do stuff when they occur.
+                this.on("success", function(file, response) {
+                    // This adds a 'key' attribute to the dropzone remove link.
+                    // Allows us to call the 'dropzone_delete' url with a way to locate
+                    //   the correct DropzoneImage instance.
+                    $(file._removeLink).attr('key', response.key);
+                    // console.log(response);
+                }),
+                this.on("removedfile", function(file) {
+                    // Remove the file from the server.
+                    var key = $(file._removeLink).attr('key');
+                    $.post(
+                        "{% url 'dropzone_delete' %}",
+                        {'key': key},
+                        function(data){
+                            if (data.success) {
+                                alert('File successfully removed from server.')
+                            }
+                        }, 'json'
+                    );
+                    // console.log('file removed');
+                })
+            }
+        };
+
+        $(function() {
+            var myDropzone = new Dropzone("div#myDropzone", { url: "{% url 'dropzone_upload' %}"});
+        });
+    </script>
+{% endblock extrahead %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h4>Dropzone</h4>
+
+            <div class="dropzone" id="myDropzone">
+                <div class="fallback">
+                    <input name="file" type="file" multiple />
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

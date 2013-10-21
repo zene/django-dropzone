@@ -1,0 +1,3 @@
+-r base.txt
+Werkzeug==0.9.4
+django-extensions==1.2.1
