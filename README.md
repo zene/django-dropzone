@@ -14,4 +14,4 @@ Here are steps to run this as a standalone project and test out the functionalit
 
 Core files
 ----------
-If you already have Djanog installed, the files that you are most interested in reside in the django-dropzone/dropzone/dropzone_test folder.
+If you already have Django installed, the files that you are most interested in reside in the django-dropzone/dropzone/dropzone_test folder.
