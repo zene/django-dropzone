@@ -1,7 +1,7 @@
 django-dropzone
 ===============
 
-An example of how to integrate dropzone.js into django
+An example of how to integrate dropzone.js into Django
 ------------------------------------------------------
 Here are steps to run this as a standalone project and test out the functionality:
 
